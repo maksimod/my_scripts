@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to install development tools (Git, Node.js, Python3, npm) on Debian
+# Script to install development tools (Git, Node.js, Python3, npm, Ansible) on Debian
 # Run as root (sudo)
 
 # Check if running as root
@@ -9,7 +9,7 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-echo "Начинаем установку инструментов разработки (Git, Node.js, Python3, npm)..."
+echo "Начинаем установку инструментов разработки (Git, Node.js, Python3, npm, Ansible)..."
 
 # Update package lists
 echo "Обновление списка пакетов..."
@@ -41,7 +41,6 @@ fi
 
 # Install Node.js and npm using NodeSource repository
 echo "Установка Node.js и npm..."
-
 # Add NodeSource repository (latest LTS version)
 if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
     echo "Добавление репозитория NodeSource..."
@@ -66,6 +65,27 @@ else
     echo "❌ Ошибка: npm не установлен!"
 fi
 
+# Install Ansible
+echo "Установка Ansible..."
+apt-get install -y ansible
+
+# Check Ansible installation
+if command -v ansible &> /dev/null; then
+    ANSIBLE_VERSION=$(ansible --version | head -n 1)
+    echo "✅ Ansible успешно установлен: $ANSIBLE_VERSION"
+else
+    # Try installing via pip if apt install fails
+    echo "Установка Ansible через pip..."
+    pip3 install ansible
+    
+    if command -v ansible &> /dev/null; then
+        ANSIBLE_VERSION=$(ansible --version | head -n 1)
+        echo "✅ Ansible успешно установлен через pip: $ANSIBLE_VERSION"
+    else
+        echo "❌ Ошибка: Ansible не установлен!"
+    fi
+fi
+
 # Install development tools
 echo "Установка дополнительных инструментов разработки..."
 apt-get install -y build-essential
@@ -79,3 +99,4 @@ echo "--------------------"
 [ -x "$(command -v pip3)" ] && echo "pip: $(pip3 --version | awk '{print $2}')"
 [ -x "$(command -v node)" ] && echo "Node.js: $(node --version)"
 [ -x "$(command -v npm)" ] && echo "npm: $(npm --version)"
+[ -x "$(command -v ansible)" ] && echo "Ansible: $(ansible --version | head -n 1 | awk '{print $2}')"
