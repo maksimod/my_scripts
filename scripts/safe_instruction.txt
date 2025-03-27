@@ -1,0 +1,12 @@
+sudo nano /etc/grub.d/40_custom
+
+#!/bin/sh
+exec tail -n +3 $0
+# Режим восстановления с защитой от записи
+menuentry "Debian Recovery Mode (Read-only)" {
+    set root=(hd0,1)
+    linux /boot/vmlinuz-$(uname -r) root=/dev/sda1 ro single init=/bin/bash
+    initrd /boot/initrd.img-$(uname -r)
+}
+
+sudo update-grub
